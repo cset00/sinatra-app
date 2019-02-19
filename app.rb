@@ -40,17 +40,22 @@ def serialize_question(question)
 end
 
 post '/ratingQuestions' do
-  error = {"errors"=>{"title"=>["cannot be blank"]}}
-  binding.pry
-  return send_response(response, 400, error) if request.params.size.zero?
+  json_params = JSON.parse(request.body.read)
+
+  return send_response(response, 400, error) if json_params.size.zero?
   
-  return send_response(response, 422, error) if request.params["title"] == ""
-  
-  new_rating_question = RatingQuestion.create(
-    title: request.params["title"]
+  new_rating_question = RatingQuestion.new(
+    title: json_params["title"]
   )
 
-  send_response(response, 201, new_rating_question) 
+  if new_rating_question.save
+    send_response(response, 201, serialize_question(new_rating_question))
+  else
+    errors = { 'errors' => new_rating_question.errors.messages }
+    return send_response(response, 422, errors)
+  end
+
+  
 end
 
 delete '/ratingQuestions/:id' do
@@ -75,16 +80,18 @@ get '/ratingQuestions/:id' do
   the_q = RatingQuestion.find_by(_id: params["id"])
   
   return send_response(response, 404,{}) if !the_q
-  send_response(response, 200, the_q)
+  send_response(response, 200, serialize_question(the_q))
 end
 
 patch '/ratingQuestions/:id' do
-  return send_response(response, 404, {}) if request.params.size.zero?
+  json_params = JSON.parse(request.body.read)
+  
+  return send_response(response, 404, {}) if json_params.size.zero?
   
   q_to_update = RatingQuestion.find_by(_id: params["id"])
   return send_response(response, 404,{}) if q_to_update == nil
 
-  RatingQuestion.update(_id: params["id"], title: request.params["title"], upsert: true)
+  q_to_update.update(title: json_params["title"])
 
-  send_response(response, 200, q_to_update)
+  send_response(response, 200, serialize_question(q_to_update))
 end

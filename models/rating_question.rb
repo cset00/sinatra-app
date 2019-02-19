@@ -8,4 +8,5 @@ class RatingQuestion
   
   validates :title, presence: true
 
+  
 end
