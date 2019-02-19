@@ -5,7 +5,6 @@ require 'json'
 require_relative 'environment'
 
 def rating_questions 
-  # JSON.parse(File.read('db.json'))['ratingQuestions']
   RatingQuestion.all.to_a
 end
 
@@ -51,31 +50,10 @@ post '/ratingQuestions' do
     title: request.params["title"]
   )
 
-
-  # json_params = JSON.parse(request.body.read)
-  # return send_response(response, 422, error) if json_params["title"] == ""
-  
-  # new_rating_question = RatingQuestion.create({
-  #   # "id": rating_questions.any? ? rating_questions.last["id"]+1 : 1, 
-  #   "title": json_params["title"], 
-  #   "tag": json_params["tag"], 
-  #   "optionSelected": json_params["optionSelected"]
-  # })
-
-
-
-  # new_rating_questions = rating_questions.push(new_rating_question)
-  # write_to_db(new_rating_questions)
-  
   send_response(response, 201, new_rating_question) 
 end
 
 delete '/ratingQuestions/:id' do
-  # q_to_del = rating_questions.find { |question| question["id"] == params["id"].to_i}
-
-  # rating_questions.delete(q_to_del)
-  # write_to_db(rating_questions)
-
   q_to_del = RatingQuestion.find_by(_id: params["id"])
 
   return send_response(response, 404,{}) if !q_to_del
@@ -94,8 +72,6 @@ get '/ratingQuestions' do
 end
 
 get '/ratingQuestions/:id' do
-  # the_q = rating_questions.find { |question| question["id"] == params["id"].to_i}
-
   the_q = RatingQuestion.find_by(_id: params["id"])
   
   return send_response(response, 404,{}) if !the_q
@@ -103,7 +79,6 @@ get '/ratingQuestions/:id' do
 end
 
 patch '/ratingQuestions/:id' do
-  # return send_response(response, 404, {}) if request.body.size.zero?
   return send_response(response, 404, {}) if request.params.size.zero?
   
   q_to_update = RatingQuestion.find_by(_id: params["id"])
@@ -111,11 +86,5 @@ patch '/ratingQuestions/:id' do
 
   RatingQuestion.update(_id: params["id"], title: request.params["title"], upsert: true)
 
-  # json_params = JSON.parse(request.body.read)
-  # updated_rating_questions = rating_questions
-  # q_to_update = updated_rating_questions.find { |question| question["id"] == params["id"].to_i}
-
-  # q_to_update.merge!(json_params)
-  # write_to_db(updated_rating_questions)
   send_response(response, 200, q_to_update)
 end
