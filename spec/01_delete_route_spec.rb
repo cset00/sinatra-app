@@ -1,14 +1,18 @@
 require "spec_helper"
 
 RSpec.describe "DELETE /ratingQuestions/:id" do
+  def app
+    Application
+  end
+  
   context "with an existing question" do
     let(:question) do
-      response = HTTP.post("#{SERVER}/ratingQuestions", json: { title: "Hello World" })
-      response.parse
+      response = post("/ratingQuestions", { title: "Hello World" }.to_json)
+      JSON.parse(response.body)
     end
 
     let(:response) do
-      HTTP.delete("#{SERVER}/ratingQuestions/#{question["id"]}")
+      delete("/ratingQuestions/#{question["id"]}")
     end
 
     it "returns a 204 No Content" do
@@ -22,7 +26,7 @@ RSpec.describe "DELETE /ratingQuestions/:id" do
 
   context "asking to delete a question that doesn't exist" do
     let(:response) do
-      HTTP.delete("#{SERVER}/ratingQuestions/i-will-never-exist")
+      delete("/ratingQuestions/i-will-never-exist")
     end
 
     it "returns a 404 Not Found" do

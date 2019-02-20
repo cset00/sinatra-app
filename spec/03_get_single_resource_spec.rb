@@ -1,26 +1,30 @@
 require "spec_helper"
 
 RSpec.describe "GET /ratingQuestions/:id" do
+  def app
+    Application
+  end
+  
   context "when the question exists" do
     let(:question) do
-      response = HTTP.post("#{SERVER}/ratingQuestions", json: { title: "Hello World" })
-      response.parse
+      response = post("/ratingQuestions", { title: "Hello World" }.to_json)
+      JSON.parse(response.body)
     end
 
-    let(:response) { HTTP.get("#{SERVER}/ratingQuestions/#{question["id"]}") }
+    let(:response) { get("/ratingQuestions/#{question["id"]}") }
 
     it "returns a 200 OK" do
       expect(response.status).to eq(200)
     end
 
     it "returns a question" do
-      expect(response.parse.is_a?(Hash)).to eq(true)
+      expect(JSON.parse(response.body).is_a?(Hash)).to eq(true)
     end
   end
 
   context "asking to get a question that doesn't exist" do
     let(:response) do
-      HTTP.get("#{SERVER}/ratingQuestions/i-will-never-exist")
+      get("/ratingQuestions/i-will-never-exist")
     end
 
     it "returns a 404 Not Found" do

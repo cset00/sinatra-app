@@ -44,7 +44,7 @@ class Application < Sinatra::Base
   post '/ratingQuestions' do
     errors = {"errors"=>{"title"=>["can't be blank"]}}
 
-    binding.pry
+    # binding.pry
 
     
     body = request.body.read
@@ -64,7 +64,7 @@ class Application < Sinatra::Base
       send_response(response, 201, serialize_question(new_rating_question))
     else
       # errors = { 'errors' => new_rating_question.errors.messages }
-      return send_response(response, 422, errors)
+      send_response(response, 422, errors)
     end
 
   end
@@ -101,7 +101,7 @@ class Application < Sinatra::Base
     end
 
     json_params = JSON.parse(body)
-    binding.pry
+    # binding.pry
     q_to_update = RatingQuestion.find_by(_id: params["id"])
     return send_response(response, 404,{}) if q_to_update == nil
 
