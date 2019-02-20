@@ -95,17 +95,19 @@ class Application < Sinatra::Base
   end
 
   patch '/ratingQuestions/:id' do
+    id = params["id"]
     body = request.body.read
+
     if body.size.zero?
       return send_response(response, 404, {}) 
     end
 
     json_params = JSON.parse(body)
-    # binding.pry
-    q_to_update = RatingQuestion.find_by(_id: params["id"])
+
+    q_to_update = RatingQuestion.find(id)
     return send_response(response, 404,{}) if q_to_update == nil
 
-    q_to_update.update(title: json_params["title"])
+    q_to_update.update(json_params)
 
     send_response(response, 200, serialize_question(q_to_update))
   end
