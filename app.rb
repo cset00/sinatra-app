@@ -53,21 +53,10 @@ class Application < Sinatra::Base
   end
 
   post '/ratingQuestions' do
-    # errors = {"errors"=>{"title"=>["can't be blank"]}}
-
-    # binding.pry
-
-    
     body = request.body.read
-
-    # you can make an one liner insted of if 
 
     return send_response(400, nil) if body.size.zero?
  
-    # if body.size.zero?
-    #   return send_response(400, errors) 
-    # end
-    
     json_params = JSON.parse(body)
     
     new_rating_question = RatingQuestion.new(
@@ -78,7 +67,6 @@ class Application < Sinatra::Base
     if new_rating_question.save
       send_response(201, serialize_question(new_rating_question))
     else
-      # insted of hardcoding it you can get error message from new_rating_question
       errors = { 'errors' => new_rating_question.errors.messages }
       send_response(422, errors)
     end
@@ -86,10 +74,7 @@ class Application < Sinatra::Base
   end
 
   delete '/ratingQuestions/:id' do
-    # it is easy to use find then you do can only pass the id. no need to provide key
-
     q_to_del = RatingQuestion.find(params["id"])
-    # q_to_del = RatingQuestion.find_by(_id: params["id"])
 
     return send_response(404,{}) if !q_to_del
 
@@ -125,17 +110,14 @@ class Application < Sinatra::Base
 
     q_to_update = RatingQuestion.find(id)
 
-    # probably you can use .nil? instead of == nil.
     return send_response(404,{}) if q_to_update.nil?
-    # return send_response(404,{}) if q_to_update == nil
+
 
     q_to_update.update(json_params)
 
     send_response(200, serialize_question(q_to_update))
   end
 
-  # what is that ???!!
-  # run! if app_file == $0
 end
 
 
