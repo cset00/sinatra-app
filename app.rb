@@ -21,13 +21,24 @@ class Application < Sinatra::Base
     200
   end
 
-  def write_to_db(object)
-    File.open('db.json', "w") do |f|
-      f.write(JSON.pretty_generate({ratingQuestions: object}))
-    end
-  end
+  # you do not need this as we are not writing on json file anymore. 
 
-  def send_response(response, status, body)
+  # def write_to_db(object)
+  #   File.open('db.json', "w") do |f|
+  #     f.write(JSON.pretty_generate({ratingQuestions: object}))
+  #   end
+  # end
+
+  # response is global so you do not need to pass it as argument
+  #you car write it like that 
+
+  # def send_response(status, body)
+  #   response.status = status
+  #   response.body = body.to_json
+  #   response
+  # end
+
+  def send_response(status, body)
     response.status = status
     response.body = body.to_json
     response
@@ -42,16 +53,20 @@ class Application < Sinatra::Base
   end
 
   post '/ratingQuestions' do
-    errors = {"errors"=>{"title"=>["can't be blank"]}}
+    # errors = {"errors"=>{"title"=>["can't be blank"]}}
 
     # binding.pry
 
     
     body = request.body.read
+
+    # you can make an one liner insted of if 
+
+    return send_response(400, nil) if body.size.zero?
  
-    if body.size.zero?
-      return send_response(response, 400, errors) 
-    end
+    # if body.size.zero?
+    #   return send_response(400, errors) 
+    # end
     
     json_params = JSON.parse(body)
     
@@ -61,22 +76,26 @@ class Application < Sinatra::Base
     )
 
     if new_rating_question.save
-      send_response(response, 201, serialize_question(new_rating_question))
+      send_response(201, serialize_question(new_rating_question))
     else
-      # errors = { 'errors' => new_rating_question.errors.messages }
-      send_response(response, 422, errors)
+      # insted of hardcoding it you can get error message from new_rating_question
+      errors = { 'errors' => new_rating_question.errors.messages }
+      send_response(422, errors)
     end
 
   end
 
   delete '/ratingQuestions/:id' do
-    q_to_del = RatingQuestion.find_by(_id: params["id"])
+    # it is easy to use find then you do can only pass the id. no need to provide key
 
-    return send_response(response, 404,{}) if !q_to_del
+    q_to_del = RatingQuestion.find(params["id"])
+    # q_to_del = RatingQuestion.find_by(_id: params["id"])
+
+    return send_response(404,{}) if !q_to_del
 
     q_to_del.destroy
     
-    send_response(response, 204, {})
+    send_response(204, {})
   end
 
   get '/ratingQuestions' do
@@ -84,14 +103,14 @@ class Application < Sinatra::Base
       serialize_question(question)
     end
 
-    send_response(response, 200, new_rating_questions)
+    send_response(200, new_rating_questions)
   end
 
   get '/ratingQuestions/:id' do
     the_q = RatingQuestion.find_by(_id: params["id"])
     
-    return send_response(response, 404,{}) if !the_q
-    send_response(response, 200, serialize_question(the_q))
+    return send_response(404,{}) if !the_q
+    send_response(200, serialize_question(the_q))
   end
 
   patch '/ratingQuestions/:id' do
@@ -99,20 +118,24 @@ class Application < Sinatra::Base
     body = request.body.read
 
     if body.size.zero?
-      return send_response(response, 404, {}) 
+      return send_response(404, {}) 
     end
 
     json_params = JSON.parse(body)
 
     q_to_update = RatingQuestion.find(id)
-    return send_response(response, 404,{}) if q_to_update == nil
+
+    # probably you can use .nil? instead of == nil.
+    return send_response(404,{}) if q_to_update.nil?
+    # return send_response(404,{}) if q_to_update == nil
 
     q_to_update.update(json_params)
 
-    send_response(response, 200, serialize_question(q_to_update))
+    send_response(200, serialize_question(q_to_update))
   end
 
-  run! if app_file == $0
+  # what is that ???!!
+  # run! if app_file == $0
 end
 
 
